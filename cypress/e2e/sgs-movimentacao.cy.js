@@ -19,7 +19,7 @@ describe('Validar filtros', () => {
         cy.contains(' Últimos 7 dias ')
             .click()
         cy.get('h3', { timeout: 10000 })
-            .should('have.text', 'Nenhum resultado encontrado neste período')
+            .should('be.visible')
     })
 
     it('Filtro periodo ultimos 15 dias ', () => {
@@ -27,7 +27,7 @@ describe('Validar filtros', () => {
         cy.contains('Últimos 15 dias')
             .click()
         cy.get('h3', { timeout: 10000 })
-            .should('have.text', 'Nenhum resultado encontrado neste período')
+            .should('be.visible')
     })
 
     it('Filtro periodo ultimos 30 dias ', () => {

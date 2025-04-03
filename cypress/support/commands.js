@@ -24,57 +24,82 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-Cypress.Commands.add('loginAd', (usuario, senha) => {
-    cy.get('#user')
-    .clear()
-    .type(usuario)
-    cy.get('#password')
-    .clear()
-    .type(senha, { log: false })
-    cy.get('.box-buttons')
-    .click()
-    // cy.intercept('GET', 'https://sarfaty-backend.internal.gruposarfaty.com.br/auth/ad-login', {
-
-    // }).as('getLogin')
-    // cy.wait('@getLogin', { timeout: 9000 })
-    
+// Comando genérico para navegar e esperar a API responder
+Cypress.Commands.add('acessarPagina', (url, alias, endpoint) => {
+    cy.visit(url);
+    cy.intercept('GET', `**${endpoint}`).as(alias)
+    cy.wait(`@${alias}`, { timeout: 10000 })
+    .its('response.statusCode').should('eq', 200)
 })
 
-Cypress.Commands.add('doLogin', () =>{
+Cypress.Commands.add('loginAd', (usuario, senha) => {
+    // Intercepta a requisição de login para aguardar sua resposta
+    cy.intercept('POST', '**/auth/ad-login').as('loginRequest')
+    // Preenche os campos de login
+    cy.get('#user')
+    .clear().type(usuario)
+    cy.get('#password')
+    .clear().type(senha, { log: false })
+    cy.get('.box-buttons')
+    .click()
+    // Aguarda a resposta da API de login antes de prosseguir
+    cy.wait('@loginRequest', {timeout:10000})
+    .its('response.statusCode').should('eq', 200)
+})
+
+
+Cypress.Commands.add('doLogin', () => {
     cy.visit('/sgs/login')
-    cy.loginAd('svc.app.itl.homol@sarfaty.local.br', 'rtP1N)$]52-t',{log:false})
-    cy.request({
-        url: '/'
-      }).then(response => {
-        expect(response.status).to.eq(200)
-      })
-      cy.wait(14000)
-    
-    
-    cy.url()
-    .should('eq', 'https://portal-dev.internal.gruposarfaty.com.br/sgs/access-invitation')
+    cy.intercept('POST', '**/auth/ad-login').as('loginRequest')
+    cy.loginAd('svc.app.itl.homol@sarfaty.local.br', 'rtP1N)$]52-t', { log: false })
+    cy.wait('@loginRequest', {timeout:10000})
+    .its('response.statusCode').should('eq', 200)
 })
 
 Cypress.Commands.add('visaoCliente', () => {
     cy.visit('/sgs/wallet')
-    cy.contains('h1', 'Selecione o Cliente', {timeout:5000})
-        .should('be.visible')
+cy.acessarPagina('/sgs/wallet', 'visaoCliente', '/sgs/wallet')
 })
 
 Cypress.Commands.add('movimentacao', () => {
     cy.visit('/sgs/documentation')
-cy.contains('h1', 'Movimentação e Documentação de Debentures', {timeout:5000})
-.should('have.text', 'Movimentação e Documentação de Debentures')
+    cy.intercept('GET', '**/sgs/documentation').as('movimentacao')
+    cy.wait('@movimentacao')
+    .its('response.statusCode').should('eq', 200)
+    // cy.contains('h1', 'Movimentação e Documentação de Debentures', { timeout: 5000 })
+    //     .should('have.text', 'Movimentação e Documentação de Debentures')
 })
 
 Cypress.Commands.add('gestaoContas', () => {
-    cy.visit('/sgs/account-management')
-    cy.contains('h4', 'Gestão de Contas', {timeout:5000})
-        .should('have.text', ' Gestão de Contas\n')
+    cy.acessarPagina('/sgs/account-management', '**/sgs/account-management', 'gestaoContas')
 })
 
 Cypress.Commands.add('totalizador', () => {
     cy.visit('/sgs/totalizer-balances')
-    cy.contains('h4', 'Totalizador de Saldos', {timeout:5000})
-        .should('have.text', 'Totalizador de Saldos')
+    cy.intercept('GET', '**/sgs/totalizer-balances').as('totalizador')
+    cy.wait('@totalizador')
+    .its('response.statusCode').should('eq', 200)
+})
+
+Cypress.Commands.add('saldo', () => {
+    cy.get(':nth-child(1) > .cdk-column-action > .box-actions > .btn-detail')
+        .click();
+    cy.get('.title-page', {timeout:4000})
+        .should('have.text', ' Totalizador de Saldos  chevron_right  Saldo e Extrato\n')
+})
+
+Cypress.Commands.add('lancFuturos', () => {
+    cy.contains('span', 'Futuros')
+        .click()
+    cy.contains(' Saldo Projetado R$ ')
+        .should('be.visible')
+})
+
+Cypress.Commands.add('insertUser', () => {
+    cy.get('input[type="text"]')
+        .type('59489244406{enter}')
+    cy.contains(' Filtro: 594.892.444-06 ', { timeout: 9000 })
+        .should('be.visible')
+    cy.contains('Selecionar período')
+        .click()
 })

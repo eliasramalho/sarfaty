@@ -60,8 +60,7 @@ describe('Validar login SGS', () => {
   })
 
   it('Login com sucesso', () => {
-    cy.loginAd('svc.app.itl.homol@sarfaty.local.br', 'rtP1N)$]52-t')
-    cy.wait(7000)
+    cy.doLogin()
   })
 
 })
