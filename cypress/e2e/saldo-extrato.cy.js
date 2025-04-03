@@ -182,7 +182,7 @@ describe('Lancamentos', () => {
 
     })
 
-    it.only('Ocultar saldo em lancamentos recentes', () => {
+    it('Ocultar saldo em lancamentos recentes', () => {
         cy.saldo()
         cy.get('.btn-eye > img')
             .click()
