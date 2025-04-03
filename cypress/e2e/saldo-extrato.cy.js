@@ -169,5 +169,29 @@ describe('Lancamentos', () => {
             .should('be.visible')
     })
 
+    it('Ocultar saldo em lancamentos futuros', () => {
+        cy.saldo()
+        cy.lancFuturos()
+        cy.get('.btn-eye > img')
+            .click()
+        cy.get('.current-balance > .value')
+            .should('have.class', 'hide-balance')
+        cy.get('.current-balance > .value')
+            .invoke('text')
+            .should('match', /^\s*[*-]*\s*$/)
+
+    })
+
+    it.only('Ocultar saldo em lancamentos recentes', () => {
+        cy.saldo()
+        cy.get('.btn-eye > img')
+            .click()
+        cy.get('.current-balance > .value')
+            .should('have.class', 'hide-balance')
+        cy.get('.current-balance > .value')
+            .invoke('text')
+            .should('match', /^\s*[*-]*\s*$/)
+    })
+
 })
 

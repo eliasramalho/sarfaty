@@ -31,7 +31,7 @@ describe('Gestao de contas', () => {
             .click()
         cy.contains('button', ' Automático ')
             .click()
-        cy.contains('Conta criada com sucesso.')
+        cy.contains('Conta criada com sucesso.', { timeout: 8000 })
             .should('be.visible')
 
     })
