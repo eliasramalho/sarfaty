@@ -52,22 +52,25 @@ Cypress.Commands.add('doLogin', () => {
     cy.visit('/sgs/login')
     cy.intercept('POST', '**/auth/ad-login').as('loginRequest')
     cy.loginAd('svc.app.itl.homol@sarfaty.local.br', 'rtP1N)$]52-t', { log: false })
-    cy.wait('@loginRequest', { timeout: 12000 })
+    cy.wait('@loginRequest')
         .its('response.statusCode').should('eq', 200)
+    cy.get('.spinner-overlay', { timeout: 20000 })
+        .should('not.exist');
 })
 
 Cypress.Commands.add('visaoCliente', () => {
-    cy.visit('/sgs/wallet')
-    cy.acessarPagina('/sgs/wallet', 'visaoCliente', '/sgs/wallet')
+    cy.acessarPagina('/sgs/wallet', 'visaoCliente', 'position/sgsAllPosition')
+    cy.get('.spinner-overlay', { timeout: 20000 })
+    .should('not.exist');
 })
 
 Cypress.Commands.add('movimentacao', () => {
     cy.visit('/sgs/documentation')
-    cy.intercept('GET', '**/sgs/documentation').as('movimentacao')
-    cy.wait('@movimentacao')
-        .its('response.statusCode').should('eq', 200)
-    // cy.contains('h1', 'Movimentação e Documentação de Debentures', { timeout: 5000 })
-    //     .should('have.text', 'Movimentação e Documentação de Debentures')
+    // cy.intercept('GET', '**/sgs/documentation').as('movimentacao')
+    // cy.wait('@movimentacao')
+    //     .its('response.statusCode').should('eq', 200)
+    cy.contains('h1', 'Movimentação e Documentação de Debentures', { timeout: 5000 })
+        .should('have.text', 'Movimentação e Documentação de Debentures')
 })
 
 Cypress.Commands.add('gestaoContas', () => {
@@ -87,24 +90,43 @@ Cypress.Commands.add('saldo', () => {
         .click();
     cy.get('.title-page', { timeout: 4000 })
         .should('be.visible')
-        cy.get('.spinner-overlay', { timeout: 20000 })
+    cy.get('.spinner-overlay', { timeout: 20000 })
         .should('not.exist');
 })
 
 Cypress.Commands.add('lancFuturos', () => {
     cy.contains('span', 'Futuros')
         .click()
+        cy.valRequisicao('GET', '**/transaction/mock-transactions**')
     cy.contains(' Saldo Projetado R$ ')
         .should('be.visible')
-        cy.get('.spinner-overlay', { timeout: 20000 })
-        .should('not.exist');
+
 })
 
 Cypress.Commands.add('insertUser', () => {
     cy.get('input[type="text"]')
         .type('59489244406{enter}')
-    cy.contains(' Filtro: 594.892.444-06 ', { timeout: 9000 })
-        .should('be.visible')
+    cy.valRequisicao('GET', '**/movement/filter?cpfCnpj=59489244406**')
     cy.contains('Selecionar período')
         .click()
 })
+
+Cypress.Commands.add('acessarCadastro', () =>{
+    cy.visit('/sgs/access-control/profile-list')
+    cy.contains('Perfis Cadastrados')
+        .should('be.visible')
+        cy.contains('button', 'Cadastrar Novo Perfil')
+        .click()
+        cy.contains('h2', 'Cadastrar Perfil')
+        .should('be.visible')
+})
+
+//Alternativa:  comando único com callback
+Cypress.Commands.add('valRequisicao', (method, urlPattern, alias = 'requisicao') => {
+    cy.intercept(method, urlPattern)
+    .as(alias)
+    cy.wait(`@${alias}`, {timeout:10000})
+    .its('response.statusCode')
+    .should('eq', 200)
+})
+
