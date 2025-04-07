@@ -19,7 +19,7 @@ jobs:
           corepack enable
           corepack prepare yarn@4.5.1 --active
 
-      - uses: actions/setup-node@v20
+      - uses: actions/setup-node@v3
         with:
           node-version: 20
           
