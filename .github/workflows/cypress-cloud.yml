@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Get code
-          uses: actions/checkout@v4.2.2
+          uses: actions/checkout@v3.3.0
           
         - name: Cypress run
-          uses: cypress-io/github-action@v6.5.0
+          uses: cypress-io/github-action@v5.0.8
           with:
-            install-dependencies: yarn install
+            install-command: yarn install
             browser: electron
             record: true
             group: UI Electron
-            spec: ${{ github.event.input.spec }}
+            spec: ${{ github.event.inputs.spec }}
           env:
             CYPRESS_RECORD_KEY: 1bfcd1ce-9fa3-445f-ae18-426e71b8840b
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
