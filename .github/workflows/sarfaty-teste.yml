@@ -14,26 +14,18 @@ jobs:
       - name: Get code
         uses: actions/checkout@v3
 
-<<<<<<< HEAD
+      - name: Setup Node.js (v20) and Corepack
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'yarn'
+
       - name: Enable Corepack and set Yarn 4.5.1
         run: |
           corepack enable
-          corepack prepare yarn@4.5.1 --active
-
-      - uses: actions/setup-node@v3
-=======
-      - name: Setup Node. js (V20) with Corepack
-        uses: actions/setup-node@v3
->>>>>>> 8968cd6b62b356ccdbbd8cb9bffb915ebe494c63
-        with:
-          node-version: 20
-          cach: yarn
-      - name: Enable Corepack
-        run: |
-          corepack enable
           corepack prepare yarn@4.5.1 --activate
-          
-      - name:  Install dependencies
+
+      - name: Install dependencies
         run: yarn install
 
       - name: Run E2E tests
